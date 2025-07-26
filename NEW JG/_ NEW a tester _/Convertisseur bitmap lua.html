@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Convertisseur Dessin Lua vers Code Bitmap</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        #manualSizeContainer.disabled { opacity: 0.5; pointer-events: none; }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 p-4 md:p-8">
+
+    <div class="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-lg">
+        <h1 class="text-2xl font-bold mb-4 text-gray-900">Convertisseur de Dessin Lua vers Code Bitmap Lua</h1>
+        <p class="mb-6 text-gray-600">Collez votre code de dessin, visualisez l'aperçu, et récupérez le code bitmap Lua optimisé.</p>
+
+        <!-- Zone de configuration -->
+        <div class="grid md:grid-cols-2 gap-6 mb-6">
+            <div>
+                <label for="luaCode" class="block text-sm font-medium text-gray-700 mb-1">1. Code de dessin Lua</label>
+                <textarea id="luaCode" rows="15" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 font-mono text-sm" placeholder="-- Collez votre code ici...&#10;lcd.drawRectangle(x, y, 10, 5)"></textarea>
+            </div>
+            <div>
+                <h3 class="text-sm font-medium text-gray-700 mb-1">2. Paramètres</h3>
+                 <div class="grid grid-cols-2 gap-4 mb-4">
+                     <div>
+                        <label for="offsetXVar" class="block text-xs font-medium text-gray-600">Valeur pour 'x'</label>
+                        <input type="number" id="offsetXVar" value="0" class="w-full p-2 border border-gray-300 rounded-md shadow-sm">
+                    </div>
+                    <div>
+                        <label for="offsetYVar" class="block text-xs font-medium text-gray-600">Valeur pour 'y'</label>
+                        <input type="number" id="offsetYVar" value="0" class="w-full p-2 border border-gray-300 rounded-md shadow-sm">
+                    </div>
+                </div>
+                <div class="flex items-center mb-4">
+                    <input type="checkbox" id="autoSizeCheckbox" class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500" checked>
+                    <label for="autoSizeCheckbox" class="ml-2 block text-sm text-gray-900">Déterminer la taille auto.</label>
+                </div>
+                <div id="manualSizeContainer" class="space-y-4">
+                    <div>
+                        <label for="bmpWidth" class="block text-xs font-medium text-gray-600">Largeur manuelle</label>
+                        <input type="number" id="bmpWidth" value="32" class="w-full p-2 border border-gray-300 rounded-md shadow-sm">
+                    </div>
+                    <div>
+                        <label for="bmpHeight" class="block text-xs font-medium text-gray-600">Hauteur manuelle</label>
+                        <input type="number" id="bmpHeight" value="32" class="w-full p-2 border border-gray-300 rounded-md shadow-sm">
+                    </div>
+                </div>
+                <button id="generateBtn" class="mt-6 w-full bg-indigo-600 text-white font-bold py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    Convertir
+                </button>
+            </div>
+        </div>
+
+        <!-- Zone de résultat -->
+        <div class="grid md:grid-cols-2 gap-6">
+            <div>
+                <h3 class="text-sm font-medium text-gray-700 mb-2">3. Aperçu de l'image</h3>
+                <div class="bg-gray-200 border border-gray-400 p-1 rounded-md inline-block" style="image-rendering: pixelated;">
+                    <canvas id="previewCanvas" width="32" height="32"></canvas>
+                </div>
+                <p id="dimensionsInfo" class="text-xs text-gray-500 mt-2"></p>
+            </div>
+            <div>
+                <label for="luaCodeOutput" class="block text-sm font-medium text-gray-700 mb-1">4. Code Bitmap Lua généré</label>
+                <textarea id="luaCodeOutput" rows="8" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 font-mono text-sm" readonly placeholder="Le code Lua apparaîtra ici..."></textarea>
+                <button id="copyBtn" class="mt-2 w-full bg-green-600 text-white font-bold py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50" disabled>
+                    Copier le code
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Récupération des éléments du DOM ---
+        const generateBtn = document.getElementById('generateBtn');
+        const luaCodeInput = document.getElementById('luaCode');
+        const bmpWidthInput = document.getElementById('bmpWidth');
+        const bmpHeightInput = document.getElementById('bmpHeight');
+        const autoSizeCheckbox = document.getElementById('autoSizeCheckbox');
+        const manualSizeContainer = document.getElementById('manualSizeContainer');
+        const offsetXVarInput = document.getElementById('offsetXVar');
+        const offsetYVarInput = document.getElementById('offsetYVar');
+        const previewCanvas = document.getElementById('previewCanvas');
+        const previewCtx = previewCanvas.getContext('2d');
+        const luaCodeOutput = document.getElementById('luaCodeOutput');
+        const copyBtn = document.getElementById('copyBtn');
+        const dimensionsInfo = document.getElementById('dimensionsInfo');
+
+        const TEMP_CANVAS_SIZE = 1024;
+        const DRAW_OFFSET = TEMP_CANVAS_SIZE / 2; // Offset pour gérer les coordonnées négatives
+        previewCtx.imageSmoothingEnabled = false;
+
+        // --- Logique des événements ---
+        function toggleAutoSize() {
+            manualSizeContainer.classList.toggle('disabled', autoSizeCheckbox.checked);
+        }
+        autoSizeCheckbox.addEventListener('change', toggleAutoSize);
+        toggleAutoSize();
+
+        generateBtn.addEventListener('click', () => {
+            const luaCode = luaCodeInput.value;
+            const offsetX = parseInt(offsetXVarInput.value, 10) || 0;
+            const offsetY = parseInt(offsetYVarInput.value, 10) || 0;
+
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = TEMP_CANVAS_SIZE;
+            tempCanvas.height = TEMP_CANVAS_SIZE;
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCtx.imageSmoothingEnabled = false;
+            tempCtx.fillStyle = 'white';
+            tempCtx.fillRect(0, 0, TEMP_CANVAS_SIZE, TEMP_CANVAS_SIZE);
+            
+            interpretAndDraw(luaCode, tempCtx, offsetX, offsetY);
+
+            let finalCanvas;
+
+            if (autoSizeCheckbox.checked) {
+                const bounds = findBoundingBox(tempCanvas);
+                if (!bounds) {
+                    alert("Aucun pixel n'a été dessiné. Impossible de déterminer la taille.");
+                    return;
+                }
+                
+                const totalMinX = Math.min(bounds.minX, DRAW_OFFSET);
+                const totalMinY = Math.min(bounds.minY, DRAW_OFFSET);
+                const totalMaxX = Math.max(bounds.maxX, DRAW_OFFSET);
+                const totalMaxY = Math.max(bounds.maxY, DRAW_OFFSET);
+
+                const finalWidth = totalMaxX - totalMinX + 1;
+                const finalHeight = totalMaxY - totalMinY + 1;
+                dimensionsInfo.textContent = `Dimensions détectées : ${finalWidth} x ${finalHeight} pixels.`;
+
+                finalCanvas = document.createElement('canvas');
+                finalCanvas.width = finalWidth;
+                finalCanvas.height = finalHeight;
+                const finalCtx = finalCanvas.getContext('2d');
+                finalCtx.imageSmoothingEnabled = false;
+                finalCtx.drawImage(tempCanvas, totalMinX, totalMinY, finalWidth, finalHeight, 0, 0, finalWidth, finalHeight);
+            } else {
+                const width = parseInt(bmpWidthInput.value, 10);
+                const height = parseInt(bmpHeightInput.value, 10);
+                if (isNaN(width) || isNaN(height) || width <= 0 || height <= 0) {
+                    alert("Veuillez entrer une largeur et une hauteur valides.");
+                    return;
+                }
+                finalCanvas = document.createElement('canvas');
+                finalCanvas.width = width;
+                finalCanvas.height = height;
+                finalCanvas.getContext('2d').drawImage(tempCanvas, DRAW_OFFSET, DRAW_OFFSET, width, height, 0, 0, width, height);
+                dimensionsInfo.textContent = `Dimensions manuelles : ${width} x ${height} pixels.`;
+            }
+
+            previewCanvas.width = finalCanvas.width;
+            previewCanvas.height = finalCanvas.height;
+            previewCtx.drawImage(finalCanvas, 0, 0);
+
+            const generatedLuaCode = generateLuaCode(finalCanvas);
+            luaCodeOutput.value = generatedLuaCode;
+            copyBtn.disabled = false;
+        });
+
+        copyBtn.addEventListener('click', () => {
+            luaCodeOutput.select();
+            document.execCommand('copy');
+            copyBtn.textContent = 'Copié !';
+            setTimeout(() => { copyBtn.textContent = 'Copier le code'; }, 2000);
+        });
+
+        // --- Fonctions de traitement ---
+        function findBoundingBox(canvas) {
+            const ctx = canvas.getContext('2d');
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = imageData.data;
+            let minX = canvas.width, minY = canvas.height, maxX = -1, maxY = -1;
+
+            for (let y = 0; y < canvas.height; y++) {
+                for (let x = 0; x < canvas.width; x++) {
+                    const i = (y * canvas.width + x) * 4;
+                    if (data[i] < 255 || data[i+1] < 255 || data[i+2] < 255) {
+                        if (x < minX) minX = x;
+                        if (x > maxX) maxX = x;
+                        if (y < minY) minY = y;
+                        if (y > maxY) maxY = y;
+                    }
+                }
+            }
+            return maxX === -1 ? null : { minX, minY, maxX, maxY };
+        }
+
+        function interpretAndDraw(code, ctx, offsetX, offsetY) {
+            const lines = code.split('\n');
+            lines.forEach(line => {
+                let processedLine = line;
+                const commentIndex = processedLine.indexOf('--');
+                if (commentIndex !== -1) {
+                    processedLine = processedLine.substring(0, commentIndex);
+                }
+                const trimmedLine = processedLine.trim();
+                if (trimmedLine === '') return;
+
+                try {
+                    const result = parseArgs(trimmedLine, offsetX, offsetY);
+                    if (result.coords.length === 0) return;
+                    
+                    if (trimmedLine.startsWith('lcd.drawPoint')) {
+                        const [x, y] = result.coords;
+                        const finalX = x + DRAW_OFFSET;
+                        const finalY = y + DRAW_OFFSET;
+                        if (result.erase) {
+                            ctx.fillStyle = 'white';
+                            ctx.fillRect(finalX, finalY, 1, 1);
+                        } else {
+                            const pixelData = ctx.getImageData(finalX, finalY, 1, 1).data;
+                            ctx.fillStyle = (pixelData[0] === 0) ? 'white' : 'black';
+                            ctx.fillRect(finalX, finalY, 1, 1);
+                        }
+                    } else if (trimmedLine.startsWith('lcd.drawLine')) {
+                        ctx.fillStyle = result.erase ? 'white' : 'black';
+                        const [x1, y1, x2, y2] = result.coords;
+                        drawLine(ctx, x1 + DRAW_OFFSET, y1 + DRAW_OFFSET, x2 + DRAW_OFFSET, y2 + DRAW_OFFSET);
+                    } else if (trimmedLine.startsWith('lcd.drawRectangle')) {
+                        ctx.fillStyle = result.erase ? 'white' : 'black';
+                        const [x, y, w, h] = result.coords;
+                        const finalX = x + DRAW_OFFSET;
+                        const finalY = y + DRAW_OFFSET;
+                        drawLine(ctx, finalX, finalY, finalX + w - 1, finalY);
+                        drawLine(ctx, finalX, finalY + h - 1, finalX + w - 1, finalY + h - 1);
+                        drawLine(ctx, finalX, finalY, finalX, finalY + h - 1);
+                        drawLine(ctx, finalX + w - 1, finalY, finalX + w - 1, finalY + h - 1);
+                    } else if (trimmedLine.startsWith('lcd.drawFilledRectangle')) {
+                        ctx.fillStyle = result.erase ? 'white' : 'black';
+                        const [x, y, w, h] = result.coords;
+                        const finalX = x + DRAW_OFFSET;
+                        const finalY = y + DRAW_OFFSET;
+                        
+                        if (result.fillType === 'SOLID') {
+                            for (let i = 0; i < w; i++) {
+                                for (let j = 0; j < h; j++) {
+                                    const isTopLeft = (i === 0 && j === 0);
+                                    const isTopRight = (i === w - 1 && j === 0);
+                                    const isBottomLeft = (i === 0 && j === h - 1);
+                                    const isBottomRight = (i === w - 1 && j === h - 1);
+                                    if (!(isTopLeft || isTopRight || isBottomLeft || isBottomRight)) {
+                                        ctx.fillRect(finalX + i, finalY + j, 1, 1);
+                                    }
+                                }
+                            }
+                        } else { // FORCE ou défaut
+                            for (let i = 0; i < w; i++) {
+                                for (let j = 0; j < h; j++) {
+                                    ctx.fillRect(finalX + i, finalY + j, 1, 1);
+                                }
+                            }
+                        }
+                    }
+                } catch(e) {
+                    console.warn("Ligne ignorée ou erreur de parsing:", trimmedLine, e);
+                }
+            });
+        }
+        
+        function parseArgs(line, offsetX, offsetY) {
+             const content = line.substring(line.indexOf('(') + 1, line.lastIndexOf(')'));
+             const parts = content.split(',');
+             const result = { coords: [], erase: false, fillType: 'FORCE' }; // Défaut à FORCE
+             parts.forEach(part => {
+                 let trimmed = part.trim();
+                 let upperTrimmed = trimmed.toUpperCase();
+                 if (upperTrimmed === 'ERASE') {
+                     result.erase = true;
+                 } else if (upperTrimmed === 'SOLID') {
+                     result.fillType = 'SOLID';
+                 } else if (upperTrimmed === 'FORCE') {
+                     result.fillType = 'FORCE';
+                 } else {
+                     try {
+                         const expression = trimmed.replace(/\bx\b/g, `(${offsetX})`).replace(/\by\b/g, `(${offsetY})`);
+                         const value = new Function('return ' + expression)();
+                         if (typeof value === 'number' && isFinite(value)) {
+                             result.coords.push(Math.round(value));
+                         }
+                     } catch (e) { /* Ignore */ }
+                 }
+             });
+             return result;
+        }
+
+        function drawLine(ctx, x1, y1, x2, y2) {
+            const dx = Math.abs(x2 - x1), sx = x1 < x2 ? 1 : -1;
+            const dy = -Math.abs(y2 - y1), sy = y1 < y2 ? 1 : -1;
+            let err = dx + dy, x = x1, y = y1;
+            while (true) {
+                ctx.fillRect(x, y, 1, 1);
+                if (x === x2 && y === y2) break;
+                const e2 = 2 * err;
+                if (e2 >= dy) { err += dy; x += sx; }
+                if (e2 <= dx) { err += dx; y += sy; }
+            }
+        }
+        
+        function generateLuaCode(canvas) {
+            const width = canvas.width;
+            const height = canvas.height;
+            const ctx = canvas.getContext('2d');
+            const imageData = ctx.getImageData(0, 0, width, height);
+            const data = imageData.data;
+            
+            let dataString = "{ ";
+            let bytesCount = 0;
+            for (let x = 0; x < width; x++) {
+                for (let y_segment = 0; y_segment < Math.ceil(height / 8); y_segment++) {
+                    let currentByte = 0;
+                    for (let bit = 0; bit < 8; bit++) {
+                        const y = (y_segment * 8) + bit;
+                        if (y < height) {
+                            const i = (y * width + x) * 4;
+                            const isBlack = data[i] < 128;
+                            if (isBlack) { currentByte |= (1 << bit); }
+                        }
+                    }
+                    dataString += `0x${currentByte.toString(16).toUpperCase().padStart(2, '0')}, `;
+                    bytesCount++;
+                    if (bytesCount > 0 && bytesCount % 12 === 0) { 
+                        dataString += '\n    '; // Indent for readability
+                    }
+                }
+            }
+            dataString = dataString.trim().replace(/,$/, '');
+            dataString += " }";
+
+            // Construct the final string in the desired format
+            const finalCode = `{ data = ${dataString}, w = ${width}, h = ${height} }`;
+            
+            return finalCode;
+        }
+    </script>
+</body>
+</html>

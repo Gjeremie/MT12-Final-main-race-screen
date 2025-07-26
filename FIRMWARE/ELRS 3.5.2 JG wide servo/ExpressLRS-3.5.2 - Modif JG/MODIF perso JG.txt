@@ -1,0 +1,8 @@
+
+Modification dans le fichier : \ExpressLRS-3.5.2\src\lib\ServoOutput\devServoOutput.cpp
+
+
+Ajout d'une ligne afin d'élargir plage servo seulement sur Channel 1 (direction) :
+
+//  JG: CHANGER LA PLAGE PWM de 988 - 2012 à 700 - 2300 uniquement sur channel 1
+            if (ch == 0) us = fmap(us, 988, 2012, 700, 2300); 

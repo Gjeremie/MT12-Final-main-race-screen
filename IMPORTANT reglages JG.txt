@@ -1,0 +1,33 @@
+--------- Réglages ELRS ---------
+
+- Rate: 500 Hz   (sans le F ou D)
+- Switch mode:  Wide
+- Telem ratio : 1/2
+- Power : dynamic avec max 250mw           (mettre sur FIXE 100mw si probleme et sur 10mw pour MiniZ)
+
+- Récepteur avec chip esp32 (Radiomaster Er6)
+
+- Channel gaz sur Ch1 de Radiomaster Er6
+
+
+
+
+--------- EXPLICATIONS ---------
+
+le rate 500 sans D ou F est le mode le moins sensible aux interférences (car LoRa) meme si moins rapide que 
+F1000 (2ms au lieu de 1ms donc négligeable)
+
+Switch mode wide pour avoir ch1 a ch4 a pleine resolution(1024 pos) et rapidité (500hz)
+et ch 6 a 12 a 128 position et moins rapide
+
+telem ratio 1/2 = telemetrie transmise toute les 4 ms (250Hz)
+
+chip ESP32 sur recepteur evite que les pins transmettent des glitch au demarrage du recepteur sur les pin pwm
+
+channel gaz (et meme direction ) a mettre sur pin recepteur qui ne sont pas Tx ou Rx afin de ne pas transférer intereference sur pin pwm au demarrage recepteur
+
+
+
+--------- INFOS ---------
+basé sur ESP32: Radiomaster ER6 G et ER6 et ER8 et ER8 G
+basé sur ESP8285: HAPPY MODEL epw5, le Radiomaster ER3c et ER5c et ER4 et ER5a
