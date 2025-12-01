@@ -5,7 +5,7 @@ With ESP32 S3 firmware and GERBER files <br><br>
 
 ![Main screen](10.JPG)   <br><br> <br>
 
-### MAIN
+### *MAIN*
 
 ![Main screen](11.JPG)   <br>
 ![Main screen](12.JPG)  ![Main screen](13.JPG)  ![Main screen](14.JPG) <br> <br>
@@ -14,7 +14,7 @@ With ESP32 S3 firmware and GERBER files <br><br>
 
 ![Main screen](17.JPG)   <br>  <br> <br>
 
-*CONFIG*
+### *CONFIG*
 
 ![Main screen](20.JPG)  ![Main screen](21.JPG)  ![Main screen](22.JPG) <br> 
  ![Main screen](23.JPG) <br>  <br>
@@ -29,10 +29,10 @@ With ESP32 S3 firmware and GERBER files <br><br>
 
   ![Main screen](35.JPG) <br>  <br><br>
 
-*HELP*
+### *HELP*
 
 ![Main screen](36.JPG) ... ![Main screen](37.JPG) ... ![Main screen](38.JPG) <br>  <br><br>
 
-*ESP32 S3*
+### *ESP32 S3*
 
  ![Main screen](00.JPG) 
