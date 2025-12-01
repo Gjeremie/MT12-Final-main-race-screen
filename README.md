@@ -5,7 +5,7 @@ With ESP32 S3 firmware and GERBER files <br><br> <br>
 
 *MAIN*
 
-![Main screen](11.JPG)    ![Main screen](12.JPG) <br>
+![Main screen](11.JPG)    ![Main screen](12.JPG)  ![Main screen](13.JPG) <br>
 
 ![Main screen](M2.JPG) <br>
 
