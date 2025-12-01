@@ -1,10 +1,11 @@
 # Lua_MT12
 Main Telemetry script for the MT12 <br>
-With EdgeTX 2.11 Firmware to Flash <br> <br> <br>
+With EdgeTX 2.11 Firmware to Flash (MT12 and receiver ER6G) <br>
+With ESP32 S3 firmware and GERBER files <br><br> <br>
 
 *MAIN*
 
-![Main screen](M1.JPG) <br>
+![Main screen](M10.JPG)   ![Main screen](M11.JPG) <br>
 
 ![Main screen](M2.JPG) <br>
 
