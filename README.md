@@ -2,6 +2,12 @@
 Main Telemetry script for the MT12 <br>
 With EdgeTX 2.11 Firmware to Flash (MT12 and receiver ER6G) <br>
 With ESP32 S3 firmware and GERBER files <br><br>
+### HARDWARE
+Gps for auto lap timer <br>
+Seeed XIAO ESP32 S3 <br>
+Matek Micro BEC 6-30V to 5V/9V-ADJ <br>
+2x FrSky Taranis X9D PLUS/X9E 6 Position Switch Pot Knob for the MT12<br>
+Hobbywing XR8 Plus G2S ESC for telemetry data<br><br>
 
 Start screen <br>
 ![Main screen](10.JPG)   <br><br> <br>
