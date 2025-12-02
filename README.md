@@ -10,7 +10,7 @@ With ESP32 S3 firmware and GERBER files <br><br>
 - Telem ratio : 1/2<br>
 - Power : dynamic avec max 250mw <br><br>
 
-![Main screen](FIRMWARE/ELRS 3.5.2 JG wide servo/Config-ER6.JPG) <br><br>
+![ER6](FIRMWARE/ELRS%203.5.2%20JG%20wide%20servo/Config-ER6.JPG) <br><br>
 
 ### HARDWARE
 - Gps for auto lap timer <br>
