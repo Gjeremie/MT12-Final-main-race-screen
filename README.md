@@ -2,6 +2,16 @@
 Main Telemetry script for the MT12 <br>
 With EdgeTX 2.11 Firmware to Flash (MT12 and receiver ER6G) <br>
 With ESP32 S3 firmware and GERBER files <br><br>
+
+### ER6G ELRS settings
+
+- Rate: 500 Hz   (sans le F ou D)<br>
+- Switch mode:  Wide<br>
+- Telem ratio : 1/2<br>
+- Power : dynamic avec max 250mw <br><br>
+
+![Main screen](11.JPG) <br><br>
+
 ### HARDWARE
 Gps for auto lap timer <br>
 Seeed XIAO ESP32 S3 <br>
