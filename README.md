@@ -68,7 +68,7 @@ Channels viewer <br>
 
 ## *NOTE*
 
-![Main screen](39.PNG) <br>  <br><br>
+![Main screen](39.png) <br>  <br><br>
 
 # *ESP32 S3*
 
