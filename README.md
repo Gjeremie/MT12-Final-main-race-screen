@@ -1,4 +1,7 @@
 # Lua Telemetry SCRIPT - MT12
+
+Version a jour: 30/09/2026 <br><br>
+
 Main Telemetry script for the MT12 <br>
 With EdgeTX 2.11 Firmware to Flash (MT12 and receiver ER6G) <br>
 With ESP32 S3 firmware and GERBER files <br><br>
@@ -62,6 +65,10 @@ Channels viewer <br>
 ## *HELP*
 
 ![Main screen](36.JPG) ... ![Main screen](37.JPG) ... ![Main screen](38.JPG) <br>  <br><br>
+
+## *NOTE*
+
+![Main screen](39.PNG) <br>  <br><br>
 
 # *ESP32 S3*
 
