@@ -1,0 +1,8 @@
+C’est cette version du firmware mt12 présente ici:
+
+modif perso JG avec Son du Vario continu (basé sur edgetx 2.12.0)
+
+
+https://github.com/Gjeremie/edgetx-2.11.2-JG
+
+
