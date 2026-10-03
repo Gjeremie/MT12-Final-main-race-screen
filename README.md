@@ -1,6 +1,6 @@
 # Lua Telemetry SCRIPT - MT12
 
-**  Version a jour: 30/09/2026  **<br><br>
+<b>  Version a jour: 30/09/2026  </b><br><br>
 
 Main Telemetry script for the MT12 <br>
 With EdgeTX 2.11 Firmware to Flash (MT12 and receiver ER6G) <br>
