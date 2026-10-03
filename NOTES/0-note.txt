@@ -1,8 +1,0 @@
-- Reglage servo St :
-FUTABA HPS CT700=
-Center 11
-L -675
-R 590
-Nor
-
-SANWA PGS-LH=
