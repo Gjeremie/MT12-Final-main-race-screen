@@ -74,4 +74,7 @@ Channels viewer <br>
 
 ESP32 S3 PCB for Receiver ER6G <br>
  ![Main screen](00.JPG) <br>
+ ![Main screen](41.png) <br>
+ ![Main screen](42.png) <br>
+ ![Main screen](43.png) <br>
  ![Main screen](40.png) 
